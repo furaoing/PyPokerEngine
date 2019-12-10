@@ -33,6 +33,7 @@ $RECYCLE.BIN/
 .idea/
 
 # IDE compliation output
+target/
 out/
 __pycache__/
 *.class
