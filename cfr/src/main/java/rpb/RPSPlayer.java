@@ -1,15 +1,14 @@
 package rpb;
 
-import java.util.Random;
 import java.util.Arrays;
+import java.util.Random;
 
-public class RPSTrainer {
+public class RPSPlayer {
     public static final int ROCK = 0, PAPER = 1, SCISSORS = 2, NUM_ACTIONS = 3;
     public static final Random random = new Random();
     double[] regretSum = new double[NUM_ACTIONS],
             strategy = new double[NUM_ACTIONS],
-            strategySum = new double[NUM_ACTIONS],
-            oppStrategy = { 0.2, 0.3, 0.5 };
+            strategySum = new double[NUM_ACTIONS];
 
     private double[] getStrategy() {
         double normalizingSum = 0;
@@ -27,6 +26,11 @@ public class RPSTrainer {
         return strategy;
     }
 
+    public int getCurrentAction(){
+        int myAction = getAction(strategy);
+        return myAction;
+    }
+
     public int getAction(double[] strategy) {
         double r = random.nextDouble();
         int a = 0;
@@ -40,25 +44,22 @@ public class RPSTrainer {
         return a;
     }
 
-    public void train(int iterations) {
+    public void move(int otherAction) {
         double[] actionUtility = new double[NUM_ACTIONS];
-        for (int i = 0; i < iterations; i++) {
-            double[] strategy = getStrategy();
-            int myAction = getAction(strategy);
-            int otherAction = getAction(oppStrategy);
+        double[] strategy = getStrategy();
+        int myAction = getAction(strategy);
 
-            actionUtility[otherAction] = 0;
-            actionUtility[otherAction == NUM_ACTIONS - 1 ? 0 : otherAction + 1] = 1;
-            actionUtility[otherAction == 0 ? NUM_ACTIONS - 1 : otherAction - 1] = -1;
-            // otherAction == 2, actionUtility[0] = 1
-            // otherAction != 2, actionUtility[otherAction+1] = 1
+        actionUtility[otherAction] = 0;
+        actionUtility[otherAction == NUM_ACTIONS - 1 ? 0 : otherAction + 1] = 1;
+        actionUtility[otherAction == 0 ? NUM_ACTIONS - 1 : otherAction - 1] = -1;
+        // otherAction == 2, actionUtility[0] = 1
+        // otherAction != 2, actionUtility[otherAction+1] = 1
 
-            // otherAction == 0, actionUtility[2] = -1
-            // otherAction != 0, actionUtility[otherAction-1] = -1
+        // otherAction == 0, actionUtility[2] = -1
+        // otherAction != 0, actionUtility[otherAction-1] = -1
 
-            for (int a = 0; a < NUM_ACTIONS; a++)
-                regretSum[a] += actionUtility[a] - actionUtility[myAction];
-        }
+        for (int a = 0; a < NUM_ACTIONS; a++)
+            regretSum[a] += actionUtility[a] - actionUtility[myAction];
     }
 
     public double[] getAverageStrategy() {
@@ -72,11 +73,5 @@ public class RPSTrainer {
             else
                 avgStrategy[a] = 1.0 / NUM_ACTIONS;
         return avgStrategy;
-    }
-
-    public static void main(String[] args) {
-        RPSTrainer trainer = new RPSTrainer();
-        trainer.train(100000000);
-        System.out.println(Arrays.toString(trainer.getAverageStrategy()));
     }
 }
